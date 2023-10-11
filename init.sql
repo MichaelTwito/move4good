@@ -1,0 +1,1 @@
+CREATE DATABASE IF NOT EXISTS move_for_good;
