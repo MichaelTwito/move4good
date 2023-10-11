@@ -1,3 +1,4 @@
+pytz
 fastapi
 mysql-connector-python
 pydantic
