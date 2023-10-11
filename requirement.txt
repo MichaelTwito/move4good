@@ -1,0 +1,8 @@
+fastapi
+mysql-connector-python
+pydantic
+pydantic-extra-types
+pyjwt
+sqlalchemy
+uvicorn
+pytest
