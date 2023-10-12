@@ -29,10 +29,3 @@ class Order(BaseModel):
     
     class Config:
         arbitrary_types_allowed = True
-
-# class PartialReport(BaseModel):
-#     description: str
-#     lat: Latitude
-#     lng: Longitude
-#     type: ReportsType = 1
-#     report_amount: int
