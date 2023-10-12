@@ -11,32 +11,6 @@ from repositories.enteties import User
 from config.config import ConfigClass
 from repositories.tables import UsersTable
 
-class OrdersDB(ABC):
-    @abstractmethod
-    def login(self, user: User) -> str:
-        raise NotImplemented()
-    
-    # @abstractmethod
-    # def auth_user(self, token: str) -> bool:
-    #     raise NotImplemented()
-    
-    # @abstractmethod
-    # def auth_admin(self, token: str) -> bool:
-    #     raise NotImplemented()
-
-    # @abstractmethod
-    # def get_reports(self) -> List[Order]:
-    #     raise NotImplemented()
-
-    # @abstractmethod
-    # def update(self, report: Order) -> int:
-    #     raise NotImplemented()
-
-    # @abstractmethod
-    # def delete(self, report_id: str) -> int:
-    #     raise NotImplemented()
-
-
 class DBclient():
     def __init__(self, connection: str):
         self.engine = create_engine(connection)
@@ -58,7 +32,6 @@ class DBclient():
             password_cipher = sha256()
             password_cipher.update(user.password.encode())
             password_cipher.update(ConfigClass.PASSWORD_PEPPER.encode())
-            print(f"HEXDIGIT {password_cipher.hexdigest()},password {sql_user.password}")
             if not compare_digest(
                 password_cipher.hexdigest(), sql_user.password
             ):
@@ -77,6 +50,7 @@ class DBclient():
             ConfigClass.JWT_SECRET_KEY,
             algorithm="HS256",
         )
+
         return encoded_jwt
 
     def add(self, instance):
