@@ -59,7 +59,7 @@ def list_orders(db_client: DBclient) -> List[Order] | None:
             created_at = order.created_at,
             last_updated_at = order.last_updated_at,
             delivery_center_id = order.delivery_center_id,
-            delivery_center = order.delivery_center
+            delivery_center = DeliveryCenter(lat=order.delivery_center.lat, lng=order.delivery_center.lng).dict()
             )
             for order in orders
           ]

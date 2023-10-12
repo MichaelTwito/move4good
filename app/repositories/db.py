@@ -85,6 +85,9 @@ class DBclient():
     def commit(self):
         self._session.commit()
 
+
+    def query(self, instance):
+        return self._session.query(instance)
     # def get_orders(self) -> List[Order] | None:
     #     try:
     #         sql_reports = self._session.query(OrdersTable)

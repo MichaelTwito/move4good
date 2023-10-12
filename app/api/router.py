@@ -6,20 +6,21 @@ from starlette.requests import Request
 from services import authentication_service,database_service
 from config.config import ConfigClass
 from repositories.enteties import User,Order, DeliveryCenter
+from services.authentication_service import auth_user, auth_admin
 
 router = APIRouter()
 APP_DB= DBclient(ConfigClass.SQL_CONNECTION_STRING)
 
 async def auth_user(request: Request):
     auth_token = request.headers.get(ConfigClass.REQUESTS_AUTH_TOKEN)
-    if not (auth_token and APP_DB.auth_user(auth_token)):
+    if not (auth_token and auth_user(auth_token)):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED"
         )
 
 async def auth_admin(request: Request):
     auth_token = request.headers.get(ConfigClass.REQUESTS_AUTH_TOKEN)
-    if not (auth_token and authentication_service.auth_admin(auth_token)):
+    if not (auth_token and auth_admin(auth_token)):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED"
         )
@@ -43,7 +44,7 @@ async def login(
     response_model=List[Order],
 )
 async def list_orders():
-    return APP_DB.get_orders()
+    return database_service.list_orders(APP_DB)
 
 @router.post(
     "/api/create_order",
