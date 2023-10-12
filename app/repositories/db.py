@@ -79,6 +79,12 @@ class DBclient():
         )
         return encoded_jwt
 
+    def add(self, instance):
+        self._session.add(instance)
+
+    def commit(self):
+        self._session.commit()
+
     # def get_orders(self) -> List[Order] | None:
     #     try:
     #         sql_reports = self._session.query(OrdersTable)

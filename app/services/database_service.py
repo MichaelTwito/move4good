@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytz
 import datetime
 from typing import List
@@ -6,6 +8,7 @@ from starlette.responses import JSONResponse
 from repositories.enteties import Order, DeliveryCenter
 from repositories.db import DBclient
 from repositories.tables import OrdersTable,DeliveryCenterTable
+from uuid import uuid4
 
 def list_delivery_centers(db_client: DBclient) -> List[DeliveryCenter] | None:
     try:
@@ -64,9 +67,9 @@ def list_orders(db_client: DBclient) -> List[Order] | None:
 def create_order(db_client: DBclient, order: Order) -> JSONResponse:
     try:
         israel_timezone = pytz.timezone('Asia/Jerusalem')
-        datetime_object = datetime.now(israel_timezone)
+        datetime_object = datetime.datetime.now(israel_timezone)
         new_record = OrdersTable(
-            id = order.id,
+            id = str(uuid4()),
             contact_number = order.contact_number,
             size_description = order.size_description,
             status = order.status,
@@ -74,12 +77,12 @@ def create_order(db_client: DBclient, order: Order) -> JSONResponse:
             dropoff_lng = order.dropoff_lng,
             created_at = datetime_object,
             last_updated_at = datetime_object,
-            delivery_center_id = order.delivery_center_id,
-            delivery_center = order.delivery_center
+            delivery_center = DeliveryCenterTable(id=order.delivery_center_id,lat=order.delivery_center.lat, lng=order.delivery_center.lng),
         )
+        new_record.delivery_center_id = new_record.delivery_center.id
         db_client.add(new_record)
         db_client.commit()
-    except Exception:
+    except Exception as e:
         return status.HTTP_500_INTERNAL_SERVER_ERROR
     return JSONResponse({"id": new_record.id,
                          "contact_number": new_record.contact_number,
@@ -87,8 +90,8 @@ def create_order(db_client: DBclient, order: Order) -> JSONResponse:
                          "status": new_record.status,
                          "dropoff_lat": new_record.dropoff_lat,
                          "dropoff_lng": new_record.dropoff_lng,
-                         "created_at": new_record.created_at,
-                         "last_updated_at": new_record.last_updated_at},
+                         "created_at": new_record.created_at.isoformat(),
+                         "last_updated_at": new_record.last_updated_at.isoformat()},
                           status_code=status.HTTP_201_CREATED)
 # def update_order(DBclient, report: Order) -> int:
 #     try:
