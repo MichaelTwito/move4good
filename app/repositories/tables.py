@@ -8,17 +8,16 @@ class UsersTable(Base):
     username = Column(String(255), primary_key=True, index=True)
     password = Column(String(255))
     role = Column(String(255))
-    delivery_center = relationship("DeliveryCenterTable", uselist=False, back_populates="user")
     delivery_center_id = Column(String(255), ForeignKey('delivery_centers.id'))
-
+    delivery_center = relationship('DeliveryCenterTable', back_populates='users')
 
 class DeliveryCenterTable(Base):
     __tablename__ = 'delivery_centers'
-    id = Column(String(255), primary_key=True, index=True)
+    id = Column(String(255), primary_key=True, index=True, default=0)
     lng = Column(Float)
     lat = Column(Float)
-    orders = relationship("OrdersTable", back_populates="delivery_center")
-    user = relationship("UsersTable", uselist=False, back_populates="delivery_center")
+    orders = relationship('OrdersTable', back_populates='delivery_center')
+    users = relationship('UsersTable', back_populates='delivery_center', uselist=False)
 
 class OrdersTable(Base):
     __tablename__ = 'orders'

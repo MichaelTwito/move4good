@@ -5,7 +5,7 @@ from starlette import status
 from starlette.responses import JSONResponse
 from repositories.enteties import Order, DeliveryCenter
 from repositories.db import DBclient
-from repositories.tables import OrdersTable,DeliveryCenterTable
+from repositories.tables import OrdersTable,DeliveryCenterTable,UsersTable
 
 def list_delivery_centers(db_client: DBclient) -> List[DeliveryCenter] | None:
     try:
@@ -25,19 +25,15 @@ def list_delivery_centers(db_client: DBclient) -> List[DeliveryCenter] | None:
 def create_delivery_center(db_client: DBclient, delivery_center: DeliveryCenter) -> JSONResponse:
     try:
         new_record = DeliveryCenter(
-                id = delivery_center.id,
-                lat = delivery_center.lat,
-                lng = delivery_center.lng
-                )
-        db_client.add(new_record)
-        db_client.commit()
-    except Exception:
+                 lat = delivery_center.lat,
+                 lng = delivery_center.lng
+                 )
+        db_client._session.add(new_record)
+        db_client._session.commit()
+    except Exception as e:
+        print(e)
         return status.HTTP_500_INTERNAL_SERVER_ERROR
-    return JSONResponse({"id": new_record.id,
-                         "lat": new_record.lat,
-                         "lng": new_record.lng,
-                         "orders": new_record.orders
-                         },
+    return JSONResponse({"ok": 5},
                           status_code=status.HTTP_201_CREATED)
 
 def list_orders(db_client: DBclient) -> List[Order] | None:

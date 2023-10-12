@@ -8,7 +8,7 @@ from config.config import ConfigClass
 from repositories.enteties import User,Order, DeliveryCenter
 
 router = APIRouter()
-APP_DB: DBclient = (ConfigClass.SQL_CONNECTION_STRING)
+APP_DB= DBclient(ConfigClass.SQL_CONNECTION_STRING)
 
 async def auth_user(request: Request):
     auth_token = request.headers.get(ConfigClass.REQUESTS_AUTH_TOKEN)
@@ -29,6 +29,7 @@ async def login(
     username: str = Body(..., embed=True),
     password: str = Body(..., embed=True),
 ):
+    print(dir(APP_DB))
     token = APP_DB.login(User(username=username, password=password))
     if not token:
         raise HTTPException(
@@ -87,6 +88,7 @@ async def delete_order(
 #TODO
 async def create_delivery_center(delivery_center: DeliveryCenter):
     return database_service.create_delivery_center(
+            APP_DB,
             DeliveryCenter(
                 lat=delivery_center.lat,
                 lng=delivery_center.lng,

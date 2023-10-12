@@ -15,9 +15,12 @@ services:
   python:
     image: python:3.11
     container_name: python_container
-    command: ["bash", "-c", "pip install -r requirement.txt && python app/main.py"]
+    command: ["bash", "-c", "pip install -r requirement.txt && python app/create_user.py admin admin 1 1 && python app/main.py"]
     environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-move4good}
+      MYSQL_USER: ${MYSQL_USER:-move_for_good}
+      MYSQL_HOST: ${MYSQL_HOST:-mysql_container}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-move_for_good}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-password}
     ports:
       - "8000:8000"
     volumes:

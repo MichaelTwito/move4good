@@ -11,15 +11,12 @@ class RolesType(IntEnum):
 class User(BaseModel):
     username: str
     password: str
-    delivery_center_id: str
 
 class DeliveryCenter(BaseModel):
-    id: str
     lat: Longitude
     lng: Latitude
     
 class Order(BaseModel):
-    id: str
     contact_number: str
     size_description: str
     status: int

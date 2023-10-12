@@ -3,13 +3,13 @@ from jwt import decode, InvalidTokenError
 from repositories.enteties import RolesType
 from config.config import ConfigClass
 
-def auth_user(self, token: str) -> bool:
-    return self.auth(token, RolesType.normal)
+def auth_user(token: str) -> bool:
+    return auth(token, RolesType.normal)
 
-def auth_admin(self, token: str) -> bool:
-    return self.auth(token, RolesType.admin)
+def auth_admin(token: str) -> bool:
+    return auth(token, RolesType.admin)
 
-def auth(self, token: str, role: RolesType) -> bool:
+def auth(token: str, role: RolesType) -> bool:
     try:
         decoded_jwt = decode(
             token, ConfigClass.JWT_SECRET_KEY, algorithms=["HS256"]

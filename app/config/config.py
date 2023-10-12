@@ -2,6 +2,7 @@ from os import getenv
 
 class ConfigClass:
     MYSQL_DATABASE= getenv('MYSQL_DATABASE')
+    REQUESTS_AUTH_TOKEN= "authorization"
     MYSQL_USER = getenv('MYSQL_USER')
     MYSQL_ROOT_PASSWORD = getenv('MYSQL_ROOT_PASSWORD')
     MYSQL_HOST = getenv('MYSQL_HOST')
