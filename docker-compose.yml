@@ -6,7 +6,7 @@ services:
     container_name: mysql_container
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-password}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-move4good}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-move_for_good}
     ports:
       - "3306:3306"
     volumes:
@@ -15,9 +15,10 @@ services:
   python:
     image: python:3.11-alpine
     container_name: python_container
-    entrypoint: ["/bin/sh", "-c"]
+    entrypoint: /bin/sh
     command:
-      - "chmod +x scripts/init.sh && scripts/init.sh"
+      - -c
+      - "chmod +x /app/scripts/init.sh && /app/scripts/init.sh && python /app/app/create_user.py admin admin 1 && python /app/app/main.py"
     environment:
       MYSQL_USER: ${MYSQL_USER:-move_for_good}
       MYSQL_HOST: ${MYSQL_HOST:-mysql_container}
