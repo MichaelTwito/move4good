@@ -12,7 +12,6 @@ from uuid import uuid4
 from utils.utils import instrumented_list_to_list_of_dicts
 
 
-
 def get_delivery_center(db_client: DBclient, id: str,parse_to_json_reponse=True) -> DeliveryCenter | None:
     try:
         delivery_center = \
@@ -24,7 +23,7 @@ def get_delivery_center(db_client: DBclient, id: str,parse_to_json_reponse=True)
     return  JSONResponse({"id": delivery_center.id,
                          "lat": delivery_center.lat,
                          "lng": delivery_center.lng,
-                         "records": instrumented_list_to_list_of_dicts(delivery_center.orders)
+                         "orders": instrumented_list_to_list_of_dicts(delivery_center.orders)
                          },
                           status_code=status.HTTP_201_CREATED) if parse_to_json_reponse\
                                                                      else delivery_center
@@ -115,35 +114,3 @@ def create_order(db_client: DBclient, order: Order) -> JSONResponse:
                          "created_at": new_record.created_at.isoformat(),
                          "last_updated_at": new_record.last_updated_at.isoformat()},
                           status_code=status.HTTP_201_CREATED)
-# def update_order(DBclient, report: Order) -> int:
-#     try:
-#         sql_report = (
-#             self._session.query(OrdersTable).filter_by(id=report.id).one()
-#         )
-#     except NoResultFound:
-#         return status.HTTP_404_NOT_FOUND
-    
-#     sql_report.description = report.description
-#     sql_report.lng = report.lng
-#     sql_report.lat = report.lat
-#     sql_report.type = report.type.value
-#     sql_report.report_amount = report.report_amount
-#     self._session.commit()
-
-#     return JSONResponse({"id": sql_report.id,
-#                         "lng": sql_report.lng,
-#                         "lat": sql_report.lat,
-#                         "type": sql_report.type,
-#                         "description": sql_report.description,
-#                         "report_amount": sql_report.report_amount,
-#                         "created_at": str(sql_report.time)}, status_code=status.HTTP_201_CREATED)
-# def delete_order(DBclient, report_id: str) -> int:
-    # try:
-    #     sql_report = (
-    #         self._session.query(OrdersTable).filter_by(id=report_id).one()
-    #     )
-    # except NoResultFound:
-    #     return status.HTTP_404_NOT_FOUND
-    # self._session.delete(sql_report)
-    # self._session.commit()
-    # return status.HTTP_204_NO_CONTENT
