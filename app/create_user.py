@@ -4,6 +4,7 @@ from config.config import ConfigClass
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 from repositories.tables import UsersTable
+
 import argparse
 
 Base = declarative_base()
