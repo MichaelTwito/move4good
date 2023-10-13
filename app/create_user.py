@@ -17,9 +17,9 @@ parser = argparse.ArgumentParser(description="Procssing username and password")
 parser.add_argument('username', type=str)
 parser.add_argument("password", type=str)
 parser.add_argument("role", help="1- admin, 2- normal user", type=str)
-parser.add_argument("delivery_center_id", type=str)
+# parser.add_argument("delivery_center_id", type=str)
 args = parser.parse_args()
-username, password, role, delivery_center_id= args.username, args.password, args.role, args.delivery_center_id
+username, password, role= args.username, args.password, args.role
 
 password_cipher = sha256()
 password_cipher.update(password.encode())
