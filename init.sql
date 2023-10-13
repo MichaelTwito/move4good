@@ -1,1 +1,1 @@
-CREATE DATABASE IF NOT EXISTS move_for_good;
+ALTER USER 'root'@'%' IDENTIFIED WITH 'mysql_native_password' BY 'password';

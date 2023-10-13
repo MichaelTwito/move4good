@@ -1,10 +1,7 @@
-#!/bin/bash
+#!/bin/sh
 
-apt-get update
-
-apt-get install mariadb-client -y
-
-
+apk update && apk add mysql-client
+# apk add bash
 # Set the number of times to attempt pinging the server
 MAX_ATTEMPTS=10
 
@@ -36,3 +33,5 @@ if [ $attempts -eq $MAX_ATTEMPTS ]; then
 fi
 
 pip install -r requirement.txt
+python app/create_user.py admin admin 1
+python app/main.py

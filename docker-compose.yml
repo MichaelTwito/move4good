@@ -13,9 +13,11 @@ services:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
   python:
-    image: python:3.11
+    image: python:3.11-alpine
     container_name: python_container
-    command: ["bash", "-c", "chmod +x scripts/init.sh && ./scripts/init.sh && python app/create_user.py admin admin 1&& python app/main.py"]
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - "chmod +x scripts/init.sh && scripts/init.sh"
     environment:
       MYSQL_USER: ${MYSQL_USER:-move_for_good}
       MYSQL_HOST: ${MYSQL_HOST:-mysql_container}

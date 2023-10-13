@@ -3,7 +3,7 @@ from fastapi import Body, Depends, HTTPException, APIRouter, Header
 from starlette import status
 from typing import List
 from starlette.requests import Request
-from services import authentication_service,database_service
+from services import database_service
 from config.config import ConfigClass
 from repositories.enteties import User,Order, DeliveryCenter
 from services.authentication_service import auth_user, auth_admin

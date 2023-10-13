@@ -36,7 +36,6 @@ class DBclient():
                 password_cipher.hexdigest(), sql_user.password
             ):
                 return ""
-            print("ok")
         except NoResultFound:
             return ""
         except:
