@@ -30,19 +30,18 @@ def get_delivery_center(db_client: DBclient, id: str,parse_to_json_reponse=True)
 
 def list_delivery_centers(db_client: DBclient) -> List[DeliveryCenter] | None:
     try:
-        delivery_centers = db_client.query(DeliveryCentersTable)
+        delivery_centers = db_client.query(DeliveryCentersTable).all()
     
     except Exception:
         return None
-    return [
-            DeliveryCenter(
-                id = delivery_center.id,
-                lat = delivery_center.lat,
-                lng = delivery_center.lng,
-                users = UsersTable()
-            )
+    return JSONResponse([
+            {
+                "id": delivery_center.id,
+                "lat": delivery_center.lat,
+                "lng": delivery_center.lng
+            }
             for delivery_center in delivery_centers
-            ]
+            ], status_code=status.HTTP_201_CREATED)
 
 def create_delivery_center(db_client: DBclient, delivery_center: DeliveryCenter, username: str) -> JSONResponse:
     try:

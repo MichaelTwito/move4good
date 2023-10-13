@@ -9,7 +9,9 @@ from repositories.enteties import User,Order, DeliveryCenter
 from services.authentication_service import auth_user, auth_admin
 from utils.utils import get_username_from_token
 router = APIRouter()
+
 APP_DB= DBclient(ConfigClass.SQL_CONNECTION_STRING)
+
 
 async def auth_user(request: Request):
     auth_token = request.headers.get(ConfigClass.REQUESTS_AUTH_TOKEN)
@@ -39,12 +41,11 @@ async def login(
     return token
 
 @router.get(
-    "/api/orders/all",
-    dependencies=[Depends(auth_user)],
+    "/api/delivery_centers",
     response_model=List[Order],
 )
 async def list_orders():
-    return database_service.list_orders(APP_DB)
+    return database_service.list_delivery_centers(APP_DB)
 
 
 @router.get(
