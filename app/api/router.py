@@ -42,18 +42,25 @@ async def login(
 
 @router.get(
     "/api/delivery_centers",
-    response_model=List[Order],
+    response_model=List[DeliveryCenter],
 )
-async def list_orders():
-    return database_service.list_delivery_centers(APP_DB)
+async def list_delivery_centers(id: str = None):
+    return database_service.list_delivery_centers(APP_DB, id=id)
 
 
 @router.get(
-    "/api/delivery_centers",
+    "/api/delivery_center",
+    dependencies=[Depends(auth_admin)],
     response_model=DeliveryCenter
 )
-async def get_delivery_center(id: str):
-    return database_service.get_delivery_center(APP_DB, id)
+async def get_delivery_center(authorization:str = Header(None)):
+    username = get_username_from_token(authorization)
+    delivery_center_id = database_service.get_delivery_center_id_for_username(APP_DB,username)
+    response =\
+          database_service.get_delivery_center(APP_DB, delivery_center_id)
+    if not delivery_center_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="DELIVERY_CENTER_DOES_NOT_EXIST")
+    return response
 
 @router.post(
     "/api/create_order",
@@ -65,15 +72,11 @@ async def create_order(order: Order):
             Order(
                 contact_number = order.contact_number,
                 size_description = order.size_description,
-                status = order.status,
+                description = order.description,
                 dropoff_lat=order.dropoff_lat,
                 dropoff_lng=order.dropoff_lng,
-                last_updated_at=order.last_updated_at,
                 dropoff_lng_amount=order.dropoff_lng,
-                created_at=order.created_at,
-                delivery_center=order.delivery_center,
                 delivery_center_id=order.delivery_center_id,
-
             )
         )
 
@@ -86,8 +89,10 @@ async def create_delivery_center(delivery_center: DeliveryCenter, authorization:
     return database_service.create_delivery_center(
             APP_DB,
             DeliveryCenter(
+                name=delivery_center.name,
+                address=delivery_center.address,
                 lat=delivery_center.lat,
-                lng=delivery_center.lng,
+                lng=delivery_center.lng
             )
             ,username
         )

@@ -1,5 +1,6 @@
+from repositories.enteties import StatusEnum
 from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Float
+from sqlalchemy import Column, Enum, Integer, String, ForeignKey, Float
 
 Base = declarative_base()
 
@@ -14,6 +15,8 @@ class UsersTable(Base):
 class DeliveryCentersTable(Base):
     __tablename__ = 'delivery_centers'
     id = Column(String(255), primary_key=True, index=True, default=0)
+    name = Column(String(255))
+    address = Column(String(255))
     lng = Column(Float)
     lat = Column(Float)
     orders = relationship('OrdersTable', back_populates='delivery_center')
@@ -24,10 +27,11 @@ class OrdersTable(Base):
     id = Column(String(255), primary_key=True, index=True)
     contact_number = Column(String(255))
     size_description = Column(String(255))
-    status = Column(Integer)
+    description = Column(String(255))
+    status = Column(Enum(StatusEnum), default=StatusEnum.OPENED)
     dropoff_lat = Column(Float)
     dropoff_lng = Column(Float)
-    created_at = Column(DateTime)
-    last_updated_at = Column(DateTime)
+    created_at = Column(Integer)
+    last_updated_at = Column(Integer)
     delivery_center_id = Column(String(255), ForeignKey('delivery_centers.id'))
     delivery_center = relationship("DeliveryCentersTable", back_populates="orders")
