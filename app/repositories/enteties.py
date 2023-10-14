@@ -1,6 +1,6 @@
-from enum import IntEnum
+import json
+from enum import Enum, IntEnum
 from pydantic import BaseModel
-from datetime import datetime
 from pydantic_extra_types.coordinate import Longitude, Latitude
 
 
@@ -12,20 +12,27 @@ class User(BaseModel):
     username: str
     password: str
 
+
+class StatusEnum(Enum):
+    OPENED = 'opened'
+    ASSIGNED = 'volunteer_assigned'
+    PICKED_UP = 'picked_up'
+    COMPLETE = 'completed'
+
 class DeliveryCenter(BaseModel):
+    name: str
+    address: str
     lat: Longitude
     lng: Latitude
     
 class Order(BaseModel):
     contact_number: str
     size_description: str
-    status: int
+    description: str
     dropoff_lat: Longitude
     dropoff_lng: Latitude
-    created_at: datetime
-    last_updated_at: datetime
     delivery_center_id: str
-    delivery_center: DeliveryCenter
+
     
     class Config:
         arbitrary_types_allowed = True

@@ -3,7 +3,6 @@ import time
 from hashlib import sha256
 from secrets import compare_digest
 from sqlalchemy.exc import NoResultFound
-from abc import ABC, abstractmethod
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from repositories.tables import Base
