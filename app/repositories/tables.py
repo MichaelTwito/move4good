@@ -28,6 +28,7 @@ class OrdersTable(Base):
     contact_number = Column(String(255))
     size_description = Column(String(255))
     description = Column(String(255))
+    address = Column(String(255))
     status = Column(Enum(StatusEnum), default=StatusEnum.OPENED)
     dropoff_lat = Column(Float)
     dropoff_lng = Column(Float)

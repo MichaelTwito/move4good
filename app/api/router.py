@@ -5,7 +5,7 @@ from typing import List
 from starlette.requests import Request
 from services import database_service
 from config.config import ConfigClass
-from repositories.enteties import User,Order, DeliveryCenter
+from repositories.enteties import User,Order, DeliveryCenter, UpdateOrderModel
 from services.authentication_service import auth_user, auth_admin
 from utils.utils import get_username_from_token
 router = APIRouter()
@@ -73,6 +73,7 @@ async def create_order(order: Order):
                 contact_number = order.contact_number,
                 size_description = order.size_description,
                 description = order.description,
+                address = order.address,
                 dropoff_lat=order.dropoff_lat,
                 dropoff_lng=order.dropoff_lng,
                 dropoff_lng_amount=order.dropoff_lng,
@@ -99,11 +100,12 @@ async def create_delivery_center(delivery_center: DeliveryCenter, authorization:
 
 #TODO
 @router.put(
-    "/api/update_order",
+    "/api/update_order/{order_id}",
     dependencies=[Depends(auth_admin)],
+    response_model=Order
 )
-async def update_order(order: Order):
-    return database_service.update_order(order)
+async def update_order(order_id: str, update_data: UpdateOrderModel):
+    return database_service.update_order(APP_DB, order_id, update_data)
 
 #TODO
 @router.delete(

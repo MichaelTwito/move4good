@@ -3,9 +3,10 @@ from __future__ import annotations
 import time
 from typing import List
 from starlette import status
+from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from starlette.responses import JSONResponse
-from repositories.enteties import Order, DeliveryCenter
+from repositories.enteties import Order, DeliveryCenter, UpdateOrderModel
 from repositories.db import DBclient
 from repositories.tables import OrdersTable,DeliveryCentersTable, UsersTable
 from uuid import uuid4
@@ -80,6 +81,50 @@ def create_delivery_center(db_client: DBclient, delivery_center: DeliveryCenter,
                          },
                           status_code=status.HTTP_201_CREATED)
 
+def update_order(db_client: DBclient, order_id: str, update_data: UpdateOrderModel):
+    try:
+        # Retrieve the existing order by ID
+        existing_order = db_client.query(OrdersTable).filter(OrdersTable.id == order_id).first()
+
+        if not existing_order:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+
+        # Define the list of field names (which are the same as attribute names)
+        field_to_attr_mapping = [
+            "contact_number",
+            "size_description",
+            "address",
+            "status",
+            "description",
+            "dropoff_lat",
+            "dropoff_lng",
+            "delivery_center_id",
+        ]
+        
+        # Update the fields with new data if they are provided in the update_data
+        for field_name in field_to_attr_mapping:
+            field_value = getattr(update_data, field_name)
+            if field_value is not None:
+                setattr(existing_order, field_name, field_value)
+
+        # Update the 'last_updated_at' timestamp
+        existing_order.last_updated_at = int(time.time())
+
+        db_client.commit()
+        return JSONResponse({"id": existing_order.id,
+                         "contact_number": existing_order.contact_number,
+                         "size_description": existing_order.size_description,
+                         "description": existing_order.description,
+                         "address": existing_order.address,
+                         "status": jsonable_encoder(existing_order.status),
+                         "dropoff_lat": existing_order.dropoff_lat,
+                         "dropoff_lng": existing_order.dropoff_lng,
+                         "created_at": existing_order.created_at,
+                         "last_updated_at": existing_order.last_updated_at},
+                          status_code=status.HTTP_201_CREATED)
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to update order")
+
 def list_orders(db_client: DBclient) -> List[Order] | None:
     try:
         orders = db_client.query(OrdersTable)
@@ -114,6 +159,7 @@ def create_order(db_client: DBclient, order: Order) -> JSONResponse:
             id = str(uuid4()),
             contact_number = order.contact_number,
             size_description = order.size_description,
+            address = order.address,
             description = order.description,
             dropoff_lat = order.dropoff_lat,
             dropoff_lng = order.dropoff_lng,
@@ -129,6 +175,7 @@ def create_order(db_client: DBclient, order: Order) -> JSONResponse:
                          "contact_number": new_record.contact_number,
                          "size_description": new_record.size_description,
                          "description": new_record.description,
+                         "address": new_record.address,
                          "status": jsonable_encoder(new_record.status),
                          "dropoff_lat": new_record.dropoff_lat,
                          "dropoff_lng": new_record.dropoff_lng,
