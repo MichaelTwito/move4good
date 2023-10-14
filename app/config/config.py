@@ -12,4 +12,5 @@ class ConfigClass:
     JWT_USERNAME = "username"
     JWT_SECRET_KEY = f"arand0mshitim4d3upSOITWILLBEHARD"
     PASSWORD_PEPPER = f"UrThep3pp3r2mys4lt"
-    SQL_CONNECTION_STRING = f"mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_ROOT_PASSWORD}@{MYSQL_HOST}/{MYSQL_DATABASE}"
+    # SQL_CONNECTION_STRING = f"mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_ROOT_PASSWORD}@{MYSQL_HOST}/{MYSQL_DATABASE}"
+    SQL_CONNECTION_STRING = f"mysql+mysqlconnector://admin:admin@localhost/move4good"
