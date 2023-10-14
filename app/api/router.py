@@ -13,14 +13,14 @@ router = APIRouter()
 APP_DB= DBclient(ConfigClass.SQL_CONNECTION_STRING)
 
 
-async def auth_user(request: Request):
+async def try_auth_user(request: Request):
     auth_token = request.headers.get(ConfigClass.REQUESTS_AUTH_TOKEN)
     if not (auth_token and auth_user(auth_token)):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED"
         )
 
-async def auth_admin(request: Request):
+async def try_auth_admin(request: Request):
     auth_token = request.headers.get(ConfigClass.REQUESTS_AUTH_TOKEN)
     if not (auth_token and auth_admin(auth_token)):
         raise HTTPException(
@@ -41,6 +41,13 @@ async def login(
     return token
 
 @router.get(
+    "/api/delivery_centers/{id}",
+    response_model=DeliveryCenter
+)
+async def get_delivery_center(id: str):
+    return database_service.get_delivery_center(APP_DB, id)
+
+@router.get(
     "/api/delivery_centers",
     response_model=List[DeliveryCenter],
 )
@@ -50,7 +57,7 @@ async def list_delivery_centers(id: str = None):
 
 @router.get(
     "/api/delivery_center",
-    dependencies=[Depends(auth_admin)],
+    dependencies=[Depends(try_auth_admin)],
     response_model=DeliveryCenter
 )
 async def get_delivery_center(authorization:str = Header(None)):
@@ -64,7 +71,7 @@ async def get_delivery_center(authorization:str = Header(None)):
 
 @router.post(
     "/api/create_order",
-    dependencies=[Depends(auth_admin)],
+    dependencies=[Depends(try_auth_admin)],
 )
 async def create_order(order: Order):
     return database_service.create_order(
@@ -82,7 +89,7 @@ async def create_order(order: Order):
 
 @router.post(
     "/api/create_delivery_center",
-    dependencies=[Depends(auth_admin)],
+    dependencies=[Depends(try_auth_admin)],
 )
 async def create_delivery_center(delivery_center: DeliveryCenter, authorization:str = Header(None)):
     username = get_username_from_token(authorization)
@@ -100,7 +107,7 @@ async def create_delivery_center(delivery_center: DeliveryCenter, authorization:
 #TODO
 @router.put(
     "/api/update_order",
-    dependencies=[Depends(auth_admin)],
+    dependencies=[Depends(try_auth_admin)],
 )
 async def update_order(order: Order):
     return database_service.update_order(order)
@@ -108,7 +115,7 @@ async def update_order(order: Order):
 #TODO
 @router.delete(
     "/api/delete_order/{id}",
-    dependencies=[Depends(auth_admin)],
+    dependencies=[Depends(try_auth_admin)],
 )
 async def delete_order(
     id: str,
@@ -118,7 +125,7 @@ async def delete_order(
 #TODO
 @router.delete(
     "/api/delete_delivery_center/{id}",
-    dependencies=[Depends(auth_admin)],
+    dependencies=[Depends(try_auth_admin)],
 )
 async def delete_delivery_center(
     id: str,
