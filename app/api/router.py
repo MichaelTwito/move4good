@@ -67,19 +67,7 @@ async def get_delivery_center(authorization:str = Header(None)):
     dependencies=[Depends(auth_admin)],
 )
 async def create_order(order: Order):
-    return database_service.create_order(
-            APP_DB,
-            Order(
-                contact_number = order.contact_number,
-                size_description = order.size_description,
-                description = order.description,
-                address = order.address,
-                dropoff_lat=order.dropoff_lat,
-                dropoff_lng=order.dropoff_lng,
-                dropoff_lng_amount=order.dropoff_lng,
-                delivery_center_id=order.delivery_center_id,
-            )
-        )
+    return database_service.create_order(db_client=APP_DB,order=order)
 
 @router.post(
     "/api/create_delivery_center",
@@ -98,7 +86,6 @@ async def create_delivery_center(delivery_center: DeliveryCenter, authorization:
             ,username
         )
 
-#TODO
 @router.put(
     "/api/update_order/{order_id}",
     dependencies=[Depends(auth_admin)],

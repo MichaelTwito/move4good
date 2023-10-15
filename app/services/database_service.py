@@ -42,10 +42,13 @@ def get_delivery_center(db_client: DBclient, id: str, parse_to_json_reponse=True
 
 def list_delivery_centers(db_client: DBclient, id: str) -> List[DeliveryCenter] | None:
     try:
+        #Filter out all the HAMAL ONLY fields
+        black_list = ['description']
         if id:
             delivery_centers = [get_delivery_center(db_client, id, parse_to_json_reponse=False)]
-            dict_to_append = {"orders": instrumented_list_to_list_of_dicts(delivery_centers[0].orders)}
-
+            dict_to_append = \
+                {"orders": instrumented_list_to_list_of_dicts(delivery_centers[0].orders)}
+            dict_to_append =   dict(filter(lambda item: item[0] not in black_list, dict_to_append.items()))
         else: 
             delivery_centers = db_client.query(DeliveryCentersTable).all()
             dict_to_append = {}
@@ -93,7 +96,7 @@ def update_order(db_client: DBclient, order_id: str, update_data: UpdateOrderMod
         field_to_attr_mapping = [
             "contact_number",
             "size_description",
-            "address",
+            "dropoff_address",
             "status",
             "description",
             "dropoff_lat",
@@ -115,7 +118,7 @@ def update_order(db_client: DBclient, order_id: str, update_data: UpdateOrderMod
                          "contact_number": existing_order.contact_number,
                          "size_description": existing_order.size_description,
                          "description": existing_order.description,
-                         "address": existing_order.address,
+                         "dropoff_address": existing_order.dropoff_address,
                          "status": jsonable_encoder(existing_order.status),
                          "dropoff_lat": existing_order.dropoff_lat,
                          "dropoff_lng": existing_order.dropoff_lng,
@@ -135,8 +138,8 @@ def list_orders(db_client: DBclient) -> List[Order] | None:
             id = order.id,
             contact_number = order.contact_number,
             size_description = order.size_description,
-            description = order.description,
             status = order.status,
+            dropoff_adderss = order.dropoff_address,
             dropoff_lat = order.dropoff_lat,
             dropoff_lng = order.dropoff_lng,
             created_at = order.created_at,
@@ -147,38 +150,41 @@ def list_orders(db_client: DBclient) -> List[Order] | None:
             for order in orders
           ]
 
-#TODO Return error when trying to create order without a delivery center
 def create_order(db_client: DBclient, order: Order) -> JSONResponse:
     try:
         delivery_center = get_delivery_center(db_client, order.delivery_center_id, False)
-        # if not delivery_center:
+        if not delivery_center:
+            raise Exception
         #     delivery_center = DeliveryCentersTable(id=order.delivery_center_id,lat=order.delivery_center.lat,lng=order.delivery_center.lng)
 
-        epoch_time = int(time.time())
+        epoch_time_in_miliseconds = int(time.time())
         new_record = OrdersTable(
             id = str(uuid4()),
             contact_number = order.contact_number,
             size_description = order.size_description,
-            address = order.address,
-            description = order.description,
+            dropoff_address = order.dropoff_address,
             dropoff_lat = order.dropoff_lat,
             dropoff_lng = order.dropoff_lng,
-            created_at = epoch_time,
-            last_updated_at = epoch_time,
+            created_at = epoch_time_in_miliseconds,
+            last_updated_at = epoch_time_in_miliseconds,
             delivery_center = delivery_center,
         )
+        if 'description' in dir(order):
+            setattr(new_record, 'description', order.description)
+            optional_dict_to_append = {'description': order.description}
+        else:
+            optional_dict_to_append = {}
         db_client.add(new_record)
         db_client.commit()
-    except Exception :
+    except Exception:
         return status.HTTP_500_INTERNAL_SERVER_ERROR
-    return JSONResponse({"id": new_record.id,
+    return JSONResponse({**{"id": new_record.id,
                          "contact_number": new_record.contact_number,
                          "size_description": new_record.size_description,
-                         "description": new_record.description,
-                         "address": new_record.address,
+                         "dropoff_address": new_record.dropoff_address,
                          "status": jsonable_encoder(new_record.status),
                          "dropoff_lat": new_record.dropoff_lat,
                          "dropoff_lng": new_record.dropoff_lng,
                          "created_at": new_record.created_at,
-                         "last_updated_at": new_record.last_updated_at},
+                         "last_updated_at": new_record.last_updated_at}, **optional_dict_to_append},
                           status_code=status.HTTP_201_CREATED)

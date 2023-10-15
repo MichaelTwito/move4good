@@ -17,8 +17,6 @@ def instrumented_list_to_list_of_dicts(instrumented_list, convert_datetime=True)
         for key in item.__dict__.keys():
             if not key.startswith("_"):
                 value = getattr(item, key)
-                if convert_datetime and isinstance(value, datetime):
-                    value = value.isoformat()
                 if isinstance(value, StatusEnum):
                     value = jsonable_encoder(value)
                 dict_item[key] = value

@@ -29,8 +29,8 @@ class DeliveryCenter(BaseModel):
 class Order(BaseModel):
     contact_number: str
     size_description: str
-    description: str
-    address: str
+    description: OptionalType[str] = None
+    dropoff_address: str
     dropoff_lat: Longitude
     dropoff_lng: Latitude
     delivery_center_id: str
@@ -42,7 +42,7 @@ class Order(BaseModel):
 class UpdateOrderModel(BaseModel):
     contact_number: OptionalType[str] = None
     size_description: OptionalType[str] = None
-    address: OptionalType[str] = None
+    dropoff_address: OptionalType[str] = None
     status: OptionalType[StatusEnum] = None
     description: OptionalType[str] = None
     dropoff_lat: OptionalType[Longitude] = None
