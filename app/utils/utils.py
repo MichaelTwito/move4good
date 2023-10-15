@@ -10,15 +10,18 @@ def get_username_from_token(token: str):
     return decoded_jwt['username']
 
 
-def instrumented_list_to_list_of_dicts(instrumented_list, convert_datetime=True):
+def instrumented_list_to_list_of_dicts(instrumented_list, blacklist=[]):
     list_of_dicts = []
     for item in instrumented_list:
+        if 'status' in blacklist and item.__dict__['status'] != StatusEnum.OPENED:
+            continue
         dict_item = {}
         for key in item.__dict__.keys():
-            if not key.startswith("_"):
+            if not key.startswith("_") and key not in blacklist:
                 value = getattr(item, key)
                 if isinstance(value, StatusEnum):
                     value = jsonable_encoder(value)
                 dict_item[key] = value
+        
         list_of_dicts.append(dict_item)
     return list_of_dicts

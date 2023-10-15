@@ -40,19 +40,20 @@ def get_delivery_center(db_client: DBclient, id: str, parse_to_json_reponse=True
                           status_code=status.HTTP_201_CREATED) if parse_to_json_reponse\
                                                                      else delivery_center
 
+#Optimize the query form the DB, add where caluse to status==opened
 def list_delivery_centers(db_client: DBclient, id: str) -> List[DeliveryCenter] | None:
     try:
         #Filter out all the HAMAL ONLY fields
-        black_list = ['description']
+        black_list = ['description','dropoff_lat', 'dropoff_lng', 'last_updated_at', 'delivery_center_id', 'last_updated_at', 'status']
         if id:
-            delivery_centers = [get_delivery_center(db_client, id, parse_to_json_reponse=False)]
+            delivery_centers = [get_delivery_center(db_client, id, False)]
             dict_to_append = \
-                {"orders": instrumented_list_to_list_of_dicts(delivery_centers[0].orders)}
-            dict_to_append =   dict(filter(lambda item: item[0] not in black_list, dict_to_append.items()))
+                {"orders": instrumented_list_to_list_of_dicts(delivery_centers[0].orders, black_list)}
         else: 
             delivery_centers = db_client.query(DeliveryCentersTable).all()
             dict_to_append = {}
-    except Exception:
+    except Exception as e:
+        print(e)
         return None
     return JSONResponse([
             {**{
