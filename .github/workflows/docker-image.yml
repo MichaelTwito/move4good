@@ -32,6 +32,6 @@ jobs:
 
     - name: Create a Package in GHCR
       run: |
-        gh auth login --with-token <<< ${{ secrets.GHCR_PAT }}
+        gh auth login --with-token <<< ${{ secrets.DOCKER_SECRET }}
         gh package publish ghcr.io/michaeltwito/move4good:latest -d
 
