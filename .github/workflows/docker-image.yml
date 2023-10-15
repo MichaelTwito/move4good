@@ -30,9 +30,5 @@ jobs:
     - name: Push the Docker image to GHCR
       run: docker push ghcr.io/michaeltwito/move4good:latest
 
-    - name: Create a Package in GHCR
-      run: |
-        gh auth login --with-token ${{ secrets.GH_PAT }}
-        gh package publish ghcr.io/michaeltwito/move4good:latest -d
 
 
