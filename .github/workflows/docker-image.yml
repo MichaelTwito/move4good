@@ -16,6 +16,9 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
+    - name: Log in to GitHub Container Registry
+      run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u michaeltwito --password-stdin
+
     - name: Build and tag the Docker image
       run: |
         docker build . --file Dockerfile --tag ghcr.io/michaeltwito/move4good:latest
