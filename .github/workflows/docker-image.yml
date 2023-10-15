@@ -26,7 +26,12 @@ jobs:
     - name: Build and tag the Docker image
       run: |
         docker build . --file Dockerfile --tag ghcr.io/michaeltwito/move4good:latest
-        echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
     - name: Push the Docker image to GHCR
       run: docker push ghcr.io/michaeltwito/move4good:latest
+
+    - name: Create a Package in GHCR
+      run: |
+        gh auth login --with-token <<< ${{ secrets.GHCR_PAT }}
+        gh package publish ghcr.io/michaeltwito/move4good:latest -d
+
