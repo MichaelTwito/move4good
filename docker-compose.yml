@@ -8,19 +8,19 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-password}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-move_for_good}
     ports:
-      - "3306:3306"
+      - "3308:3306"
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      -  mysql_data:/var/lib/mysql
 
   python:
-    image: python:3.11-alpine
+    image: python:3.11
     container_name: python_container
-    entrypoint: /bin/sh
-    command:
-      - -c
-      - "chmod +x /app/scripts/init.sh && /app/scripts/init.sh && python /app/app/create_user.py admin admin 1 && python /app/app/main.py"
+    build:
+      dockerfile: Dockerfile
+      context: '.'
     environment:
-      MYSQL_USER: ${MYSQL_USER:-move_for_good}
+      MYSQL_USER: ${MYSQL_USER:-root}
       MYSQL_HOST: ${MYSQL_HOST:-mysql_container}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-move_for_good}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-password}
