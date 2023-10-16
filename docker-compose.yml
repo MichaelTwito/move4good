@@ -20,7 +20,7 @@ services:
       - -c
       - "chmod +x /app/scripts/init.sh && /app/scripts/init.sh && python /app/app/create_user.py admin admin 1 && python /app/app/main.py"
     environment:
-      MYSQL_USER: ${MYSQL_USER:-move_for_good}
+      MYSQL_USER: ${MYSQL_USER:-root}
       MYSQL_HOST: ${MYSQL_HOST:-mysql_container}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-move_for_good}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-password}
@@ -34,3 +34,11 @@ services:
 
 volumes:
   mysql_data:
+
+
+# docker run -e MYSQL_USER=root \
+#            -e MYSQL_HOST=192.168.48.2 \
+#            -e MYSQL_DATABASE=${MYSQL_DATABASE:-move_for_good} \
+#            -e MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-password} \
+#            -p 8000:4200 \
+#            test

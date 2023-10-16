@@ -1,4 +1,3 @@
-import json
 from enum import Enum, IntEnum
 from pydantic import BaseModel
 from typing import Optional as OptionalType
@@ -19,6 +18,7 @@ class StatusEnum(Enum):
     ASSIGNED = 'volunteer_assigned'
     PICKED_UP = 'picked_up'
     COMPLETE = 'completed'
+    DELETED = 'deleted'
 
 class DeliveryCenter(BaseModel):
     name: str

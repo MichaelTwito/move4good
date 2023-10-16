@@ -6,56 +6,55 @@ from starlette import status
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from starlette.responses import JSONResponse
-from repositories.enteties import Order, DeliveryCenter, UpdateOrderModel
-from repositories.db import DBclient
+from api.input_objects_schemas import Order, DeliveryCenter, UpdateOrderModel
+from clients.db_client import DBclient
 from repositories.tables import OrdersTable,DeliveryCentersTable, UsersTable
 from uuid import uuid4
-from utils.utils import instrumented_list_to_list_of_dicts
+from utils.utils import instrumented_list_to_list_of_dicts,status_filter_instrumented_list
 
-def get_delivery_center_id_for_username(db_client: DBclient, username: str):
+def list_delivery_centers_for_authenticated_user(db_client: DBclient, username: str, id: str, objects_as_dicts=True) -> DeliveryCenter | None:
     try:
-        user = \
-            db_client.query(
-                UsersTable
-                ).filter_by(username=username).one()
-    except Exception:
-        return None
-    return user.delivery_center_id
-
-def get_delivery_center(db_client: DBclient, id: str, parse_to_json_reponse=True) -> DeliveryCenter | None:
-    try:
-        delivery_center = \
+        user = (
+            db_client.query(UsersTable)
+            .filter_by(username=username)
+            .one()
+        )
+        delivery_centers = \
             db_client.query(
                 DeliveryCentersTable
-                ).filter_by(id=id).one()
+                ).filter_by(user_id=user.id).all()\
+            if not id else \
+            db_client.query(
+                DeliveryCentersTable
+                ).filter_by(user_id=user.id, id=id).all()
+        
     except Exception:
         return None
-    return  JSONResponse({"id": delivery_center.id,
-                          "name": delivery_center.name,
-                          "address": delivery_center.address,
-                         "lat": delivery_center.lat,
-                         "lng": delivery_center.lng,
-                         "orders": instrumented_list_to_list_of_dicts(delivery_center.orders)
-                         },
-                          status_code=status.HTTP_201_CREATED) if parse_to_json_reponse\
-                                                                     else delivery_center
+    return\
+        instrumented_list_to_list_of_dicts(
+                                            delivery_centers
+                                            )\
+                                        if objects_as_dicts else delivery_centers
 
 #Optimize the query form the DB, add where caluse to status==opened
 def list_delivery_centers(db_client: DBclient, id: str) -> List[DeliveryCenter] | None:
     try:
         #Filter out all the HAMAL ONLY fields
-        black_list = ['description','dropoff_lat', 'dropoff_lng', 'last_updated_at', 'delivery_center_id', 'last_updated_at', 'status']
+        blacklist = ['description','dropoff_lat', 'dropoff_lng', 'last_updated_at', 'delivery_center_id', 'last_updated_at', 'status']
         if id:
-            delivery_centers = [get_delivery_center(db_client, id, False)]
+            delivery_centers = \
+                            db_client.query(
+                                            instance=DeliveryCentersTable
+                                            ).all()
+            list_of_orders = status_filter_instrumented_list(delivery_centers[0].orders, blacklist)
             dict_to_append = \
-                {"orders": instrumented_list_to_list_of_dicts(delivery_centers[0].orders, black_list)}
+                {"orders": instrumented_list_to_list_of_dicts(list_of_orders, blacklist)}
         else: 
             delivery_centers = db_client.query(DeliveryCentersTable).all()
             dict_to_append = {}
-    except Exception as e:
-        print(e)
+    except Exception:
         return None
-    return JSONResponse([
+    return [
             {**{
                 "id": delivery_center.id,
                 "name": delivery_center.name,
@@ -64,18 +63,25 @@ def list_delivery_centers(db_client: DBclient, id: str) -> List[DeliveryCenter] 
                 "lng": delivery_center.lng
             },** dict_to_append}
             for delivery_center in delivery_centers
-            ], status_code=status.HTTP_201_CREATED)
+            ]
 
 def create_delivery_center(db_client: DBclient, delivery_center: DeliveryCenter, username: str) -> JSONResponse:
     try:
         user = db_client.query(UsersTable).filter_by(username=username).one()
-        if not user.delivery_center_id:
-            delivery_center = DeliveryCentersTable(id = str(uuid4()), name=delivery_center.name, address=delivery_center.address, lat = delivery_center.lat,lng = delivery_center.lng, user=user)
-            db_client.add(delivery_center)
-            db_client.commit()
-        else:
-            delivery_center = get_delivery_center(db_client=db_client, id=user.delivery_center_id, parse_to_json_reponse=False)
-    except Exception:
+        
+        delivery_center = DeliveryCentersTable(
+                                                id = str(uuid4()),
+                                                name=delivery_center.name, 
+                                                address=delivery_center.address, 
+                                                lat = delivery_center.lat,
+                                                lng = delivery_center.lng, 
+                                                user=user
+                                                )
+        db_client.add(delivery_center)
+        db_client.commit()
+
+    except Exception as e:
+        print(e)
         return status.HTTP_500_INTERNAL_SERVER_ERROR
     return JSONResponse({"id": delivery_center.id,
                         "name": delivery_center.name,
@@ -115,20 +121,21 @@ def update_order(db_client: DBclient, order_id: str, update_data: UpdateOrderMod
         existing_order.last_updated_at = int(time.time())
 
         db_client.commit()
-        return JSONResponse({"id": existing_order.id,
-                         "contact_number": existing_order.contact_number,
-                         "size_description": existing_order.size_description,
-                         "description": existing_order.description,
-                         "dropoff_address": existing_order.dropoff_address,
-                         "status": jsonable_encoder(existing_order.status),
-                         "dropoff_lat": existing_order.dropoff_lat,
-                         "dropoff_lng": existing_order.dropoff_lng,
-                         "created_at": existing_order.created_at,
-                         "last_updated_at": existing_order.last_updated_at},
-                          status_code=status.HTTP_201_CREATED)
     except Exception:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to update order")
-
+        return None
+    return {
+            "id": existing_order.id,
+            "contact_number": existing_order.contact_number,
+            "size_description": existing_order.size_description,
+            "description": existing_order.description,
+            "dropoff_address": existing_order.dropoff_address,
+            "status": jsonable_encoder(existing_order.status),
+            "dropoff_lat": existing_order.dropoff_lat,
+            "dropoff_lng": existing_order.dropoff_lng,
+            "created_at": existing_order.created_at,
+            "last_updated_at": existing_order.last_updated_at
+            }
+                         
 def list_orders(db_client: DBclient) -> List[Order] | None:
     try:
         orders = db_client.query(OrdersTable)
@@ -151,12 +158,18 @@ def list_orders(db_client: DBclient) -> List[Order] | None:
             for order in orders
           ]
 
-def create_order(db_client: DBclient, order: Order) -> JSONResponse:
+def create_order(db_client: DBclient, username, order: Order) -> JSONResponse:
     try:
-        delivery_center = get_delivery_center(db_client, order.delivery_center_id, False)
+        delivery_center =\
+            list_delivery_centers_for_authenticated_user(
+                db_client=db_client,
+                username=username,
+                id=order.delivery_center_id,
+                objects_as_dicts=False
+                )[0]
+        
         if not delivery_center:
             raise Exception
-        #     delivery_center = DeliveryCentersTable(id=order.delivery_center_id,lat=order.delivery_center.lat,lng=order.delivery_center.lng)
 
         epoch_time_in_miliseconds = int(time.time())
         new_record = OrdersTable(
@@ -178,8 +191,8 @@ def create_order(db_client: DBclient, order: Order) -> JSONResponse:
         db_client.add(new_record)
         db_client.commit()
     except Exception:
-        return status.HTTP_500_INTERNAL_SERVER_ERROR
-    return JSONResponse({**{"id": new_record.id,
+        return None
+    return {**{"id": new_record.id,
                          "contact_number": new_record.contact_number,
                          "size_description": new_record.size_description,
                          "dropoff_address": new_record.dropoff_address,
@@ -187,5 +200,5 @@ def create_order(db_client: DBclient, order: Order) -> JSONResponse:
                          "dropoff_lat": new_record.dropoff_lat,
                          "dropoff_lng": new_record.dropoff_lng,
                          "created_at": new_record.created_at,
-                         "last_updated_at": new_record.last_updated_at}, **optional_dict_to_append},
-                          status_code=status.HTTP_201_CREATED)
+                         "last_updated_at": new_record.last_updated_at}, **optional_dict_to_append}
+                          

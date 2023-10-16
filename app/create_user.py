@@ -4,7 +4,7 @@ from config.config import ConfigClass
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 from repositories.tables import UsersTable
-
+from uuid import uuid4
 import argparse
 
 Base = declarative_base()
@@ -27,6 +27,7 @@ password_cipher.update(ConfigClass.PASSWORD_PEPPER.encode())
 with Session() as session:
     try:
         new_record = UsersTable(
+            id = str(uuid4()),
             username=username,
             password=password_cipher.hexdigest(),
             role=role
