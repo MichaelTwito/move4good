@@ -7,7 +7,7 @@ Base = declarative_base()
 class UsersTable(Base):
     __tablename__ = 'users'
     id = Column(String(255), primary_key=True , index=True)
-    username = Column(String(255), index=True)
+    username = Column(String(255), index=True, unique=True)
     password = Column(String(255))
     role = Column(String(255))
     delivery_centers = relationship('DeliveryCentersTable', back_populates='user')
@@ -16,7 +16,7 @@ class DeliveryCentersTable(Base):
     __tablename__ = 'delivery_centers'
     id = Column(String(255), primary_key=True, index=True, default=0)
     name = Column(String(255))
-    address = Column(String(255))
+    address = Column(String(255), unique=True)
     lng = Column(Float)
     lat = Column(Float)
     orders = relationship('OrdersTable', back_populates='delivery_center')

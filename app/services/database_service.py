@@ -67,6 +67,7 @@ def list_delivery_centers(db_client: DBclient, id: str) -> List[DeliveryCenter] 
 
 def create_delivery_center(db_client: DBclient, delivery_center: DeliveryCenter, username: str) -> JSONResponse:
     try:
+
         user = db_client.query(UsersTable).filter_by(username=username).one()
         
         delivery_center = DeliveryCentersTable(
@@ -82,14 +83,14 @@ def create_delivery_center(db_client: DBclient, delivery_center: DeliveryCenter,
 
     except Exception as e:
         print(e)
-        return status.HTTP_500_INTERNAL_SERVER_ERROR
-    return JSONResponse({"id": delivery_center.id,
-                        "name": delivery_center.name,
-                        "address": delivery_center.address,
-                         "lat": delivery_center.lat,
-                         "lng": delivery_center.lng
-                         },
-                          status_code=status.HTTP_201_CREATED)
+        return None
+    return {"id": delivery_center.id,
+            "name": delivery_center.name,
+            "address": delivery_center.address,
+            "lat": delivery_center.lat,
+            "lng": delivery_center.lng
+            }
+
 
 def update_order(db_client: DBclient, order_id: str, update_data: UpdateOrderModel):
     try:
