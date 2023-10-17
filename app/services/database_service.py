@@ -37,22 +37,23 @@ def list_delivery_centers_for_authenticated_user(db_client: DBclient, username: 
                                         if objects_as_dicts else delivery_centers
 
 #Optimize the query form the DB, add where caluse to status==opened
-def list_delivery_centers(db_client: DBclient, id: str) -> List[DeliveryCenter] | None:
+def list_delivery_centers(db_client: DBclient, id: str=None) -> List[DeliveryCenter] | None:
     try:
         #Filter out all the HAMAL ONLY fields
         blacklist = ['description','dropoff_lat', 'dropoff_lng', 'last_updated_at', 'delivery_center_id', 'last_updated_at', 'status']
         if id:
             delivery_centers = \
-                            db_client.query(
-                                            instance=DeliveryCentersTable
-                                            ).all()
+                db_client.query(
+                                instance=DeliveryCentersTable
+                                ).filter_by(id=id).all()
             list_of_orders = status_filter_instrumented_list(delivery_centers[0].orders, blacklist)
             dict_to_append = \
                 {"orders": instrumented_list_to_list_of_dicts(list_of_orders, blacklist)}
         else: 
             delivery_centers = db_client.query(DeliveryCentersTable).all()
             dict_to_append = {}
-    except Exception:
+    except Exception as e:
+        print(e)
         return None
     return [
             {**{

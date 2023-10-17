@@ -37,8 +37,8 @@ volumes:
 
 
 # docker run -e MYSQL_USER=root \
-#            -e MYSQL_HOST=192.168.48.2 \
-#            -e MYSQL_DATABASE=${MYSQL_DATABASE:-move_for_good} \
-#            -e MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-password} \
-#            -p 8000:4200 \
-#            test
+#            -e MYSQL_HOST=192.168.1.103 \
+#            -e MYSQL_DATABASE=move_for_good \
+#            -e MYSQL_ROOT_PASSWORD=password \
+#            -p 8000:8000 \
+#            ghcr.io/michaeltwito/move4good:latest

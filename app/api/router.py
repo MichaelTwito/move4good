@@ -42,13 +42,26 @@ async def login(
         )
     return token
 
+
+
+@router.get(
+    "/api/delivery_center/{id}",
+    response_model=List[DeliveryCenter],
+)
+async def list_delivery_centers(id: str):
+    delivery_centers: List[DeliveryCenter] | None =\
+        database_service.list_delivery_centers(APP_DB, id=id)
+    if not delivery_centers:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="DELIVERY_CENTER_DOES_NOT_EXIST")
+    return JSONResponse(delivery_centers, status_code=status.HTTP_201_CREATED)
+
 @router.get(
     "/api/delivery_centers",
     response_model=List[DeliveryCenter],
 )
-async def list_delivery_centers(id: str = None):
+async def list_delivery_centers():
     delivery_centers: List[DeliveryCenter] | None =\
-        database_service.list_delivery_centers(APP_DB, id=id)
+        database_service.list_delivery_centers(APP_DB)
     if not delivery_centers:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="DELIVERY_CENTER_DOES_NOT_EXIST")
     return JSONResponse(delivery_centers, status_code=status.HTTP_201_CREATED)
