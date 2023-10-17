@@ -18,6 +18,8 @@ class DBclient():
     def commit(self):
         self._session.commit()
 
-
+    def rollback(self):
+        self._session.rollback()
+        
     def query(self, instance):
         return self._session.query(instance)

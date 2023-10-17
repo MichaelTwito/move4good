@@ -82,7 +82,7 @@ def create_delivery_center(db_client: DBclient, delivery_center: DeliveryCenter,
         db_client.commit()
 
     except Exception as e:
-        print(e)
+        db_client.rollback()
         return None
     return {"id": delivery_center.id,
             "name": delivery_center.name,
@@ -123,6 +123,7 @@ def update_order(db_client: DBclient, order_id: str, update_data: UpdateOrderMod
 
         db_client.commit()
     except Exception:
+        db_client.rollback()
         return None
     return {
             "id": existing_order.id,
@@ -192,6 +193,7 @@ def create_order(db_client: DBclient, username, order: Order) -> JSONResponse:
         db_client.add(new_record)
         db_client.commit()
     except Exception:
+        db_client.rollback()
         return None
     return {**{"id": new_record.id,
                          "contact_number": new_record.contact_number,
