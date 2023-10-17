@@ -27,7 +27,7 @@ password_cipher.update(ConfigClass.PASSWORD_PEPPER.encode())
 with Session() as session:
     try:
         new_record = UsersTable(
-            id = str(uuid4(),
+            id = str(uuid4()),
             username=username,
             password=password_cipher.hexdigest(),
             role=role
